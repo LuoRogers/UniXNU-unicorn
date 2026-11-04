@@ -135,7 +135,7 @@ completion = ["Metal 能完成最小渲染"]
 limits = ["尚未开始"]
 next_action = ["内核稳定后按 thor 的 Metal 记录移植"]
 evidence = [
-  {kind = "source", reference = "drivers", result = "12 个驱动子模块按 thor pin 拉齐，路径与 pong 一致"}
+  {kind = "source", reference = ".gitmodules", result = "drivers/ 下 12 个驱动以 submodule 引用，路径名与 pong 一致、pin 与 thor 对齐"}
 ]
 
 [[area]]
