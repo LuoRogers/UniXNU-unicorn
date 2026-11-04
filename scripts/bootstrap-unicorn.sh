@@ -42,11 +42,11 @@ fi
 git -C "$UNIXNU" checkout -q "$PIN"
 git -C "$UNIXNU" log --oneline -1
 
-echo "== 2. SoC 种子（确定性 commit，期望 $EXPECT_SOC）"
+echo "== 2. SoC 种子（确定性 commit，期望 ${EXPECT_SOC}）"
 if [ -d "$SOC" ]; then
   have=$(git -C "$SOC" rev-parse HEAD 2>/dev/null || echo none)
   if [ "$have" != "$EXPECT_SOC" ]; then
-    echo "   现有种子 SHA 不符（$have），重建"
+    echo "   现有种子 SHA 不符（${have}），重建"
     rm -rf "$SOC"
   fi
 fi

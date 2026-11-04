@@ -45,7 +45,7 @@ FD="$UEFI/Build/unicornPkg/${TARGET}_CLANGPDB/FV/SILICIUM_UEFI.fd"
 DTB="$UEFI/Platforms/Xiaomi/unicornPkg/FdtBlob/sm8475-xiaomi-unicorn.dtb"
 
 echo "== 输入检查 =="
-[ -f "$FD" ]  || { echo "缺固件: $FD（先跑 unixnu build firmware --target $TARGET）" >&2; exit 1; }
+[ -f "$FD" ]  || { echo "缺固件: ${FD}（先跑 unixnu build firmware --target ${TARGET}）" >&2; exit 1; }
 [ -f "$DTB" ] || { echo "缺 DTB: $DTB" >&2; exit 1; }
 echo "  OS profile: $OS_PROFILE"
 echo "  固件: $FD  ($(stat -c%s "$FD") B, sha256 $(sha256sum "$FD" | cut -c1-16))"
