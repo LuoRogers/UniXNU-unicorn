@@ -4,19 +4,19 @@ name: kernel-macos
     inputs:
       os_profile:
         description: OS profile
-        required: 'true'
+        required: true
         default: ipados-18.7.10-22H374
         type: choice
         options:
         - ipados-18.7.10-22H374
       prelink:
         description: 是否做 prelink（首次先 false，用原生内核）
-        required: 'true'
-        default: 'false'
+        required: true
+        default: false
         type: boolean
       volume_layout_run:
         description: 复用某个既有 run 的 volume layout（填 run id；留空则重新跑 userdata）
-        required: 'false'
+        required: false
         default: ''
         type: string
 env:
@@ -123,7 +123,7 @@ jobs:
       run: "OUT=../UniXNU/out/unicorn/${OS_PROFILE}/unicorn_ipados18\npython3 kits/PongPlatform24/build-kernel.py \\\n  --artifact-dir \"$OUT/kernel\" \\\n  --tree \"$OUT/tree\" \\\n  --config-path \"$OUT/.config\" \\\n  --hardware-dtb \"$OUT/device-tree/hardware.dtb\" \\\n  --jobs 4\nls -l \"$OUT/kernel\" || true\nls -l \"$OUT/tree/build/xnu/ios-obj/DEVELOPMENT_ARM64_PONG/\" | head -20 || true\n"
     - name: prelink kernel with the IPSW kernelcache (best effort)
       working-directory: UniXNU
-      continue-on-error: 'true'
+      continue-on-error: true
       env:
         UNIXNU_DEVICE: ${{ github.workspace }}/device
       run: 'OUT=../UniXNU/out/unicorn/${OS_PROFILE}/unicorn_ipados18
