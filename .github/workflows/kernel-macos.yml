@@ -92,13 +92,33 @@ jobs:
         run: |
           bash scripts/pin-baseline-machine-config.sh ../UniXNU
 
-      - name: build kernel
+      # 为什么不用 `unixnu build kernel`：框架的共享内核步骤是给树莓派（BCM2837）准备的，
+      # 它先跑一遍 bootstrap pass 并**用 DEVELOPMENT_ARM64_BCM2837 下的编译记录**判断是否可以继续；
+      # 本板的聚合走 PONG 机器配置、且编译记录由设备仓自己的脚本生成，这条判断永远不成立，
+      # 于是 bootstrap pass 的"只编到链接"必然被判成致命错误。
+      # 设备仓的 kit 就是 pong/thor 官方用的那条构建链，这里直接用它。
+      - name: assemble tree
         working-directory: UniXNU
         env:
           UNIXNU_DEVICE: ${{ github.workspace }}/device
         run: |
-          python3.12 ./unixnu build kernel -D ../device
-          ls -l ../UniXNU/out/unicorn/${OS_PROFILE}/unicorn_ipados18/kernel/ || true
+          python3.12 ./unixnu tree -D ../device
+          ls -d ../UniXNU/out/unicorn/${OS_PROFILE}/unicorn_ipados18/tree
+
+      - name: build kernel (device kit builder, MACHINE_CONFIGS=PONG)
+        working-directory: device
+        env:
+          UNIXNU_DEVICE: ${{ github.workspace }}/device
+          JOBS: 4
+        run: |
+          OUT=../UniXNU/out/unicorn/${OS_PROFILE}/unicorn_ipados18
+          python3 kits/PongPlatform24/build-kernel.py \
+            --artifact-dir "$OUT/kernel" \
+            --tree "$OUT/tree" \
+            --config-path "$OUT/.config" \
+            --jobs 4
+          ls -l "$OUT/kernel" || true
+          ls -l "$OUT/tree/build/xnu/ios-obj/DEVELOPMENT_ARM64_PONG/" | head -20 || true
 
       - name: build payload
         working-directory: UniXNU
