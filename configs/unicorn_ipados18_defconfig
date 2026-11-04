@@ -44,7 +44,7 @@ CONFIG_XNU_OWNER_UNION_SYSTEMOS=n
 CONFIG_XNU_PONG_APFS_DEBUG=y
 CONFIG_XNU_PONG_ADRENO_PLATFORM=n
 CONFIG_XNU_PONG_BACKLIGHT=n
-CONFIG_XNU_PONG_POWER=n
+CONFIG_XNU_PONG_POWER=y
 CONFIG_XNU_PONG_EARLY_TRACE=n
 CONFIG_XNU_PONG_LEGACY_UACCESS=n
 CONFIG_XNU_PONG_RAMOOPS_CONSOLE=y
@@ -81,7 +81,10 @@ CONFIG_XNU_PONG_WIFI=n
 # 本文件现在与它逐键相同，只有 ADRENO_PLATFORM / WIFI / BACKLIGHT 三项保持 n
 #（分别缺本机 GPU 固件与外部 Linux 源码树），这三项在 M4/M6 补上采集后再打开。
 
-# 2026-11-05: PONG_POWER 先关（pong 的 CI defconfig 也不设它）。
 # 打开它会额外编 build/pong-power/libPongPower.a；本轮链接时报的
 # _pong_smmu_lease_lock/_unlock 就是它该提供的，说明该归档没有真正把
 # PongPlatformResources.cpp 编进去——留到 M4 接电源管理时再查。
+
+# 2026-11-05: PONG_POWER 打开，并且 build-pong-power-native.py 的源列表补上了
+# PongPlatformResources.cpp —— 它才是 pong_smmu_lease_lock/unlock 的定义处，
+# 原列表漏了它，导致 NativeUfs 的 weak 引用链接不上。
