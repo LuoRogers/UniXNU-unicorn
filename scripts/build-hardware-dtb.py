@@ -25,7 +25,15 @@ def dtc():
 
 
 def main():
-    device = Path(os.environ.get('UNIXNU_DEVICE', Path(__file__).resolve().parents[1]))
+    # 设备仓定位：优先 UNIXNU_DEVICE；其次从构建树的 kits/<kit> 反查（组装树里那是指向设备仓的软链）；
+    # 最后退回脚本的上两级目录（在设备仓内直接运行时的情况）。
+    device = os.environ.get('UNIXNU_DEVICE')
+    if device:
+        device = Path(device)
+    elif Path('kits/PongPlatform24').exists():
+        device = Path('kits/PongPlatform24').resolve()
+    else:
+        device = Path(__file__).resolve().parents[1]
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--source', default='dts/unicorn.dts',
                         help='board DTS, relative to the device repository')
