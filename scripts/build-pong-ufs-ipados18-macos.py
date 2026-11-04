@@ -1,6 +1,20 @@
 #!/usr/bin/env python3
 """Compile the Pong UFS transport and optional diagnostics."""
 import hashlib
+
+def _defconfig_lines():
+    """Read the board's defconfig; fall back to the board.toml name.
+
+    The upstream scripts hardcode configs/pong_ipados18_defconfig, which does not
+    exist in a port whose defconfig is named after its own board.
+    """
+    path = DEVICE / 'configs/pong_ipados18_defconfig'
+    if not path.is_file():
+        import tomllib
+        name = tomllib.loads((DEVICE / 'board.toml').read_text())['kernel']['defconfig']
+        path = DEVICE / 'configs' / name
+    return path.read_text().splitlines()
+
 import argparse
 import json
 import os
@@ -36,13 +50,13 @@ def main():
     sdk = subprocess.check_output(
         ['xcrun', '--sdk', 'iphoneos', '--show-sdk-path'], text=True, env=env).strip()
     obj = out / 'NativeUfs.o'
-    trace_enabled = 'CONFIG_XNU_PONG_EARLY_TRACE=y' in (DEVICE / 'configs/pong_ipados18_defconfig').read_text().splitlines()
+    trace_enabled = 'CONFIG_XNU_PONG_EARLY_TRACE=y' in _defconfig_lines()
     command = ['xcrun', '--sdk', 'iphoneos', 'clang++', '-target', 'arm64-apple-ios18.0',
         '-isysroot', sdk, '-mkernel', '-ffreestanding', '-fno-builtin', '-fno-exceptions',
         '-fno-rtti', '-fno-stack-check', '-std=gnu++17', '-fblocks', '-O2',
         '-DKERNEL=1', '-DKERNEL_PRIVATE=1', '-DXNU_KERNEL_PRIVATE=1',
         '-DXNU_PONG_EARLY_TRACE=' + str(int(trace_enabled)),
-        '-DXNU_PONG_UFS_DATA=' + str(int('CONFIG_XNU_OWNER_DATA_UFS=y' in (DEVICE/'configs/pong_ipados18_defconfig').read_text().splitlines())),
+        '-DXNU_PONG_UFS_DATA=' + str(int('CONFIG_XNU_OWNER_DATA_UFS=y' in _defconfig_lines())),
         '-I' + str(DEVICE / 'mac-build/storage-abi18/include'),
         '-I' + str(tree / '.cache/xnu-work/EXTERNAL_HEADERS'),
         '-I' + str(framework / 'PrivateHeaders'), '-I' + str(framework / 'Headers'),
