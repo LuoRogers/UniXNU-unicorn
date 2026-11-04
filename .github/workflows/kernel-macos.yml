@@ -81,6 +81,12 @@ jobs:
           python3.12 -m pip install --quiet --upgrade pip
           bash scripts/bootstrap-unicorn.sh --unixnu ../UniXNU --soc ../soc-seed
 
+      # 内核步骤要求 cmake / ninja / unifdef；设备仓的 kit 构建还要 dtc。
+      - name: install build tools
+        run: |
+          brew install --quiet cmake ninja unifdef dtc
+          for t in cmake ninja unifdef dtc; do command -v "$t" || exit 1; done
+
       - name: pin baseline machine config (BCM2837 -> PONG)
         working-directory: device
         run: |
