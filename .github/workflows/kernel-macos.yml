@@ -21,9 +21,7 @@ name: kernel-macos
         type: string
 permissions:
   contents: read
-  # 跨 run 下载 volume-layout 制品需要 actions:read
   actions: read
-
 env:
   DEVICE: unicorn
   OS_PROFILE: ${{ inputs.os_profile }}
@@ -125,7 +123,7 @@ jobs:
       env:
         UNIXNU_DEVICE: ${{ github.workspace }}/device
         JOBS: 4
-      run: "OUT=../UniXNU/out/unicorn/${OS_PROFILE}/unicorn_ipados18\npython3 kits/PongPlatform24/build-kernel.py \\\n  --artifact-dir \"$OUT/kernel\" \\\n  --tree \"$OUT/tree\" \\\n  --config-path \"$OUT/.config\" \\\n  --hardware-dtb \"$OUT/device-tree/hardware.dtb\" \\\n  --jobs 4\nls -l \"$OUT/kernel\" || true\nls -l \"$OUT/tree/build/xnu/ios-obj/DEVELOPMENT_ARM64_PONG/\" | head -20 || true\n"
+      run: "OUT=../UniXNU/out/unicorn/${OS_PROFILE}/unicorn_ipados18\nset +e\npython3 kits/PongPlatform24/build-kernel.py \\\n    --artifact-dir \"$OUT/kernel\" \\\n    --tree \"$OUT/tree\" \\\n    --config-path \"$OUT/.config\" \\\n    --hardware-dtb \"$OUT/device-tree/hardware.dtb\" \\\n    --jobs 4\nrc=$?\nif [ $rc -ne 0 ]; then\n  echo \"=== kit builder failed (rc=$rc); inner build log tail ===\"\n  LOG=$(ls -t ../build/unicorn/build-*.log 2>/dev/null | head -1)\n  if [ -n \"${LOG:-}\" ]; then echo \"log: $LOG\"; tail -120 \"$LOG\"; else echo \"no inner build log\"; fi\n  exit $rc\nfi\nls -l \"$OUT/kernel\" || true\nls -l \"$OUT/tree/build/xnu/ios-obj/DEVELOPMENT_ARM64_PONG/\" | head -20 || true\n"
     - name: prelink kernel with the IPSW kernelcache (best effort)
       working-directory: UniXNU
       continue-on-error: true
@@ -179,7 +177,7 @@ jobs:
 
           UniXNU/out/unicorn/**/logs/*
 
-          device/build/**/*.log
+          build/**/*.log
 
           UniXNU/out/unicorn/**/logs/*.log
 
