@@ -41,7 +41,7 @@ CONFIG_XNU_OWNER_CACHE_VOLUME_UUID=""
 CONFIG_XNU_OWNER_ROOT_AUDIT=n
 CONFIG_XNU_OWNER_ROOT_TRUST=n
 CONFIG_XNU_OWNER_UNION_SYSTEMOS=n
-CONFIG_XNU_PONG_APFS_DEBUG=n
+CONFIG_XNU_PONG_APFS_DEBUG=y
 CONFIG_XNU_PONG_ADRENO_PLATFORM=n
 CONFIG_XNU_PONG_BACKLIGHT=n
 CONFIG_XNU_PONG_POWER=y
@@ -63,7 +63,6 @@ CONFIG_XNU_PONG_WIFI=n
 # 2026-11-05: WiFi（ath11k）与背光需要外部 Linux 源码树（PONG_WIFI_SOURCE / sheng），
 # 首次上机（M3）不需要，先在 CI 里关掉；M6 接外设时再打开并补来源。
 
-# 2026-11-05: M3 阶段关闭 APFS debug handoff。该开关要求同时满足
 # XNU_NATIVE_UFS=1 + OWNER_CACHE_MOUNT=1 + (OWNER_UNION_SYSTEMOS 或 OWNER_CRYPTEX_FILES)=1，
 # 那是 M5 挂 SystemOS 时才需要的组合；首次上机只看内核能不能起来。
 
@@ -77,3 +76,7 @@ CONFIG_XNU_PONG_WIFI=n
 # 2026-11-05: OWNER_* 与 pong 官方 defconfig 对齐（都置 y）。
 # 链接阶段缺的 _native_owner_cache_* 符号正是这些实现提供的；
 # 三个卷 UUID（OS/SystemOS/Data）由 kit 构建时用 volume-layout.json 注入。
+
+# 2026-11-05: 与 pong 的 CI 变体（pong_ipados18_ci_defconfig）对齐：
+# 本文件现在与它逐键相同，只有 ADRENO_PLATFORM / WIFI / BACKLIGHT 三项保持 n
+#（分别缺本机 GPU 固件与外部 Linux 源码树），这三项在 M4/M6 补上采集后再打开。
