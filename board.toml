@@ -105,6 +105,8 @@ volume = "UNIXNU"
 # inside the payload image the package step repacks, so the volume stays well
 # below that bound.
 size_mib = 96
+# 让生成的启动菜单带上 Tools（→ Advanced Logger），用它把固件日志导出成 QR。
+tools = true
 # The current runtime arguments this board brings up with: the ones scripts/build-ipados18-prelinked-boot.py
 # used to write, minus its boot-epoch (the ADT carries a software clock instead) and with the
 # applog list trimmed to the services the trace reads. DarwinBoot copies the line into a
