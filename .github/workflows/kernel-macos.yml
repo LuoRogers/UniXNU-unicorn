@@ -36,6 +36,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         path: device
+        submodules: recursive
     - name: checkout UniXNU framework (pinned)
       uses: actions/checkout@v4
       with:
