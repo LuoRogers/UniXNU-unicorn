@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the boot image's device tree from the board DTS, inside the build tree.
+"""Build the boot image's device tree from the board DTS (unicorn), inside the build tree.
 
 A firmware preflight script: unixnu runs it with the build tree as the working
 directory and UNIXNU_UEFI / UNIXNU_DEVICE in the environment, and the boot image
@@ -27,11 +27,11 @@ def dtc():
 def main():
     device = Path(os.environ.get('UNIXNU_DEVICE', Path(__file__).resolve().parents[1]))
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--source', default='dts/pong.dts',
+    parser.add_argument('--source', default='dts/unicorn.dts',
                         help='board DTS, relative to the device repository')
     parser.add_argument('--include', action='append', default=[],
                         help='include directory, relative to the device repository (repeatable)')
-    parser.add_argument('--output', default='build/pong/pong.dtb',
+    parser.add_argument('--output', default='build/unicorn/unicorn.dtb',
                         help='output, relative to the build tree')
     args = parser.parse_args()
     source = (device / args.source).resolve()

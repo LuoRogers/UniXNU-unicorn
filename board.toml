@@ -62,7 +62,7 @@ dsc = "Platforms/Xiaomi/unicornPkg/unicorn.dsc"
 fd = "Build/unicornPkg/{target}_CLANGPDB/FV/SILICIUM_UEFI.fd"
 # Runs in the build tree before the firmware build and writes the device tree the boot image
 # carries; [bootimg] dtb names the same path.
-preflight = ["scripts/build-pong-hardware-dtb.py"]
+preflight = ["scripts/build-hardware-dtb.py"]
 patches = [
   "Resources/MuPatches/AsmMacroLib.patch",
   "Resources/MuPatches/Auth-Service.patch",
