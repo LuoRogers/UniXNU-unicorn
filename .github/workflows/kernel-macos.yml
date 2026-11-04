@@ -1,18 +1,18 @@
 name: kernel-macos
-on:
+'on':
   workflow_dispatch:
     inputs:
       os_profile:
         description: OS profile
-        required: true
+        required: 'true'
         default: ipados-18.7.10-22H374
         type: choice
         options:
         - ipados-18.7.10-22H374
       prelink:
         description: 是否做 prelink（首次先 false，用原生内核）
-        required: true
-        default: false
+        required: 'true'
+        default: 'false'
         type: boolean
 env:
   DEVICE: unicorn
@@ -103,13 +103,23 @@ jobs:
         UNIXNU_DEVICE: ${{ github.workspace }}/device
         JOBS: 4
       run: "OUT=../UniXNU/out/unicorn/${OS_PROFILE}/unicorn_ipados18\npython3 kits/PongPlatform24/build-kernel.py \\\n  --artifact-dir \"$OUT/kernel\" \\\n  --tree \"$OUT/tree\" \\\n  --config-path \"$OUT/.config\" \\\n  --hardware-dtb \"$OUT/device-tree/hardware.dtb\" \\\n  --jobs 4\nls -l \"$OUT/kernel\" || true\nls -l \"$OUT/tree/build/xnu/ios-obj/DEVELOPMENT_ARM64_PONG/\" | head -20 || true\n"
+    - name: prelink kernel with the IPSW kernelcache (best effort)
+      working-directory: UniXNU
+      continue-on-error: true
+      env:
+        UNIXNU_DEVICE: ${{ github.workspace }}/device
+      run: 'OUT=../UniXNU/out/unicorn/${OS_PROFILE}/unicorn_ipados18
+
+        python3.12 ./unixnu prelink -D ../device
+
+        ls -l "$OUT/kernel/" || true
+
+        '
     - name: build payload
       working-directory: UniXNU
       env:
         UNIXNU_UNIQUE_CHIP_ID: ${{ secrets.UNIXNU_UNIQUE_CHIP_ID }}
       run: 'OUT=../UniXNU/out/unicorn/${OS_PROFILE}/unicorn_ipados18
-
-        # 没有走 prelink（那一步依赖共享内核步骤），直接把 kit 产出的聚合当内核喂给 payload。
 
         AGG="$OUT/tree/build/xnu/ios-obj/DEVELOPMENT_ARM64_PONG/mach.development.pong"
 
@@ -117,7 +127,9 @@ jobs:
 
         mkdir -p "$OUT/kernel"
 
-        cp "$AGG" "$OUT/kernel/kernel.macho"
+        # prelink 成功时 kernel.macho 已存在（含 kext），不要覆盖
+
+        [ -s "$OUT/kernel/kernel.macho" ] || cp "$AGG" "$OUT/kernel/kernel.macho"
 
         python3.12 ./unixnu payload -D ../device --kernel "$OUT/kernel/kernel.macho"
 
