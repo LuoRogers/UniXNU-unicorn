@@ -102,9 +102,18 @@ jobs:
       # 而 unicorn 的 ABL 需要 Android boot header v4，且 ramdisk 必须是 payload
       # （UniXNU 菜单的启动项来自 ramdisk 里的 EFI/UniXNU/Payloads/kernel.macho）。
       # scripts/make-m3-image.sh 用固件仓的 build-bootimg.py 打 v4，并做结构自校验。
-      - name: build boot image (v4, payload as ramdisk)
+      # 固件（SILICIUM_UEFI.fd）在 WSL 里编好、不进 CI，所以这一步有产物时才打包。
+      # 内核与 payload 一定会产出；引导镜像可在本地用同一条脚本组装：
+      #   bash scripts/make-m3-image.sh --payload <payload.img>
+      - name: build boot image (v4, payload as ramdisk; needs a prebuilt firmware volume)
         working-directory: device
         run: |
+          FD=../uefi-unicorn/Build/unicornPkg/RELEASE_CLANGPDB/FV/SILICIUM_UEFI.fd
+          if [ ! -f "$FD" ]; then
+            echo "跳过打包：CI 里没有 $FD（固件在本地编）。"
+            echo "本地组装： bash scripts/make-m3-image.sh --payload ../UniXNU/out/unicorn/${OS_PROFILE}/unicorn_ipados18/payload/payload.img"
+            exit 0
+          fi
           bash scripts/make-m3-image.sh \
             --payload ../UniXNU/out/unicorn/${OS_PROFILE}/unicorn_ipados18/payload/payload.img \
             --out ../UniXNU/out/unicorn/${OS_PROFILE}/unicorn_ipados18/boot-m3
