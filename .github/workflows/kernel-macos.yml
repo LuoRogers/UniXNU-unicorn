@@ -81,6 +81,11 @@ jobs:
           python3.12 -m pip install --quiet --upgrade pip
           bash scripts/bootstrap-unicorn.sh --unixnu ../UniXNU --soc ../soc-seed
 
+      - name: pin baseline machine config (BCM2837 -> PONG)
+        working-directory: device
+        run: |
+          bash scripts/pin-baseline-machine-config.sh ../UniXNU
+
       - name: build kernel
         working-directory: UniXNU
         env:
