@@ -105,6 +105,16 @@ jobs:
           python3.12 ./unixnu tree -D ../device
           ls -d ../UniXNU/out/unicorn/${OS_PROFILE}/unicorn_ipados18/tree
 
+      # kit 构建器要一份 hardware DTB；它自己的 include 目录推算方式不适用于本仓
+      # （soc 的 dtsi 在 ../soc-seed/dts，不在共享树里），所以这里自己用 dtc 编好再传进去。
+      - name: compile hardware device tree
+        working-directory: device
+        run: |
+          OUT=../UniXNU/out/unicorn/${OS_PROFILE}/unicorn_ipados18
+          mkdir -p "$OUT/device-tree"
+          dtc -I dts -O dtb -i ../soc-seed/dts -o "$OUT/device-tree/hardware.dtb" dts/unicorn.dts
+          ls -l "$OUT/device-tree/hardware.dtb"
+
       - name: build kernel (device kit builder, MACHINE_CONFIGS=PONG)
         working-directory: device
         env:
@@ -116,6 +126,7 @@ jobs:
             --artifact-dir "$OUT/kernel" \
             --tree "$OUT/tree" \
             --config-path "$OUT/.config" \
+            --hardware-dtb "$OUT/device-tree/hardware.dtb" \
             --jobs 4
           ls -l "$OUT/kernel" || true
           ls -l "$OUT/tree/build/xnu/ios-obj/DEVELOPMENT_ARM64_PONG/" | head -20 || true
