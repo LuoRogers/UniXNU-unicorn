@@ -102,6 +102,9 @@ jobs:
 
       - name: build payload
         working-directory: UniXNU
+        env:
+          # 框架只从环境变量读平台种子（device/.unique-chip-id 那个文件实际没有被读取）
+          UNIXNU_UNIQUE_CHIP_ID: ${{ secrets.UNIXNU_UNIQUE_CHIP_ID }}
         run: |
           python3.12 ./unixnu payload -D ../device
           ls -l ../UniXNU/out/unicorn/${OS_PROFILE}/unicorn_ipados18/payload/ || true
@@ -128,6 +131,7 @@ jobs:
           ls -l ../UniXNU/out/unicorn/${OS_PROFILE}/unicorn_ipados18/boot-m3/
 
       - name: upload artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: unicorn-kernel-payload-boot
