@@ -73,7 +73,10 @@ patches = [
 packages = [
   "{uefi}",
   "{tree}/package",
-  "{tree}/drivers/DarwinBoot24",
+  # 固件自带的 DarwinBoot 包（由 uefi-mondrian 继承而来，路径稳定、不依赖设备仓 submodule）。
+  # TODO(darwin24): darwin24 的 boot_args ABI 是 0x480/1024，Pong 的 DarwinBoot24 变体在
+  # kits/PongPlatform24 里；换成它需要先拉设备仓 drivers/ 的 submodule。
+  "{uefi}/Platforms/Xiaomi/DarwinBootPkg",
   "{edk2}",
   "{uefi}/Platforms/Xiaomi",
   "{uefi}/Common/Mu",
