@@ -1,5 +1,5 @@
 name: kernel-macos
-true:
+on:
   workflow_dispatch:
     inputs:
       os_profile:
