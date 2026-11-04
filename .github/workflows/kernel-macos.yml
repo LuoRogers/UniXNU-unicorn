@@ -48,13 +48,10 @@ jobs:
           ref: ${{ env.UNIXNU_REF }}
           path: UniXNU
 
-      - name: checkout uefi-unicorn firmware
-        uses: actions/checkout@v4
+      - name: setup python 3.12
+        uses: actions/setup-python@v5
         with:
-          repository: ${{ github.repository_owner }}/uefi-unicorn
-          path: uefi-unicorn
-        # 固件只在打包步骤用到；缺这个仓时不至于让内核构建整体失败
-        continue-on-error: true
+          python-version: '3.12'
 
       - name: reclaim disk
         run: |
