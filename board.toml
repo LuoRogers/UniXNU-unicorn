@@ -38,7 +38,7 @@ config_fragments = ["arch:configs/common.config", "soc:configs/sm8475.config", "
 patch_series = ["device:migration/format2/arch-darwin24.series", "soc:patches/xnu/series", "os:patches/xnu/series", "device:patches/xnu-ipados18/series"]
 # Explicitly empty: an array here replaces the arch profile's list, and its
 # archive builders produce the BCM2837 providers, not this board's aggregate.
-archives = []
+archives = ["component:PongPlatform24"]
 # The Darwin 24 aggregate is compiled with MACHINE_CONFIGS=PONG (config/MASTER.arm64.pong, added
 # by patches/xnu-ipados18), not with the BCM2837 machine config the shared kernel step selects.
 # Folding that into the shared step is open; see the packaging area of porting.toml.

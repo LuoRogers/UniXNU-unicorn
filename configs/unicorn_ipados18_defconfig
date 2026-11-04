@@ -51,7 +51,7 @@ CONFIG_XNU_PONG_RAMOOPS_CONSOLE=y
 CONFIG_XNU_PONG_VOLATILE_PANIC_LOG=y
 CONFIG_XNU_SHENG_PMGR=n
 CONFIG_XNU_SMMU4K_PROBE=n
-CONFIG_XNU_SOURCE_CORECRYPTO14=y
+CONFIG_XNU_SOURCE_CORECRYPTO14=n
 CONFIG_XNU_SOURCE_MOCKFS=n
 CONFIG_XNU_SOURCE_PTHREAD=n
 CONFIG_XNU_TRUST_CACHE_RUNTIME=n
@@ -66,3 +66,7 @@ CONFIG_XNU_PONG_WIFI=n
 # 2026-11-05: M3 阶段关闭 APFS debug handoff。该开关要求同时满足
 # XNU_NATIVE_UFS=1 + OWNER_CACHE_MOUNT=1 + (OWNER_UNION_SYSTEMOS 或 OWNER_CRYPTEX_FILES)=1，
 # 那是 M5 挂 SystemOS 时才需要的组合；首次上机只看内核能不能起来。
+
+# 2026-11-05: 与 pong/thor 官方 defconfig 对齐——crypto 走 IPSW kernelcache 的 prelinked 组件，
+# 不用源码 corecrypto14（后者要求 build/corecrypto-2023/libcorecrypto_kernel_noasm-namespaced.a，
+# 那条链只有 pong 作者本机具备）。因此 prelink 步骤是必需的。
