@@ -14,6 +14,11 @@ name: kernel-macos
         required: 'true'
         default: 'false'
         type: boolean
+      volume_layout_run:
+        description: 复用某个既有 run 的 volume layout（填 run id；留空则重新跑 userdata）
+        required: 'false'
+        default: ''
+        type: string
 env:
   DEVICE: unicorn
   OS_PROFILE: ${{ inputs.os_profile }}
@@ -71,10 +76,23 @@ jobs:
 
         '
     - name: download the volume layout from the userdata job
-      uses: actions/download-artifact@v4
-      with:
-        name: volume-layout
-        path: ci-volume-layout
+      run: 'set -euo pipefail
+
+        RUN_ID="${{ inputs.volume_layout_run }}"
+
+        [ -n "$RUN_ID" ] || RUN_ID="${{ github.run_id }}"
+
+        echo "download volume-layout from run ${RUN_ID}"
+
+        rm -rf ci-volume-layout && mkdir -p ci-volume-layout
+
+        gh run download "$RUN_ID" -R "$GITHUB_REPOSITORY" -n volume-layout -D ci-volume-layout
+
+        ls -l ci-volume-layout
+
+        '
+      env:
+        GH_TOKEN: ${{ github.token }}
     - name: seed private-inputs/volume-layout.json
       run: "set -euo pipefail\nmkdir -p private-inputs\ncp ci-volume-layout/ci-volume-layout.json private-inputs/volume-layout.json\npython3 - <<'PY'\nimport json, pathlib\nd = json.loads(pathlib.Path('private-inputs/volume-layout.json').read_text())\nif d.get('ci_placeholder'):\n    raise SystemExit('volume layout still holds placeholders')\nfor key in ('os', 'systemos', 'data'):\n    if len(d.get(key, {}).get('uuid', '')) != 36:\n        raise SystemExit('no usable %s uuid' % key)\nprint('volume layout ok')\nPY\n"
     - name: assemble tree
@@ -105,7 +123,7 @@ jobs:
       run: "OUT=../UniXNU/out/unicorn/${OS_PROFILE}/unicorn_ipados18\npython3 kits/PongPlatform24/build-kernel.py \\\n  --artifact-dir \"$OUT/kernel\" \\\n  --tree \"$OUT/tree\" \\\n  --config-path \"$OUT/.config\" \\\n  --hardware-dtb \"$OUT/device-tree/hardware.dtb\" \\\n  --jobs 4\nls -l \"$OUT/kernel\" || true\nls -l \"$OUT/tree/build/xnu/ios-obj/DEVELOPMENT_ARM64_PONG/\" | head -20 || true\n"
     - name: prelink kernel with the IPSW kernelcache (best effort)
       working-directory: UniXNU
-      continue-on-error: true
+      continue-on-error: 'true'
       env:
         UNIXNU_DEVICE: ${{ github.workspace }}/device
       run: 'OUT=../UniXNU/out/unicorn/${OS_PROFILE}/unicorn_ipados18
@@ -156,10 +174,15 @@ jobs:
 
           UniXNU/out/unicorn/**/logs/*
 
-          '
+          device/build/**/*.log
+
+          UniXNU/out/unicorn/**/logs/*.log
+
+          private-inputs/*.json'
         if-no-files-found: warn
         retention-days: 14
     needs: userdata
+    if: always() && (needs.userdata.result == 'success' || inputs.volume_layout_run != '')
   userdata:
     name: userdata image (macOS)
     runs-on: macos-15-intel
@@ -228,3 +251,4 @@ jobs:
           userdata-image.json
 
           '
+    if: inputs.volume_layout_run == ''
