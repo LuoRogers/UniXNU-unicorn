@@ -68,9 +68,9 @@ jobs:
 
         '
     - name: install build tools
-      run: 'brew install --quiet cmake ninja unifdef dtc
+      run: 'brew install --quiet cmake ninja unifdef dtc lzfse
 
-        for t in cmake ninja unifdef dtc; do command -v "$t" || exit 1; done
+        for t in cmake ninja unifdef dtc lzfse; do command -v "$t" || exit 1; done
 
         '
     - name: pin baseline machine config (BCM2837 -> PONG)
