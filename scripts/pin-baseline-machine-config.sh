@@ -51,8 +51,8 @@ chmod +x "$SCRIPT"
 echo "== 校验 =="
 bc=$(grep -c 'MACHINE_CONFIGS=BCM2837' "$SCRIPT" || true)
 vu=$(grep -c 'vm_unix.o_CFLAGS_ADD=-DVM_UNSAFE_TYPES' "$SCRIPT" || true)
-echo "  残留 BCM2837: $bc（应为 0）"
-echo "  vm_unix.o 已带 -DVM_UNSAFE_TYPES: $vu（应为 ≥1）"
+echo "  残留 BCM2837: ${bc}（应为 0）"
+echo "  vm_unix.o 已带 -DVM_UNSAFE_TYPES: ${vu}（应为 ≥1）"
 grep -n 'vm_unix.o_CFLAGS_ADD' "$SCRIPT" | head -3
 [ "$bc" = "0" ] && [ "$vu" -ge 1 ] || { echo "修正不完整" >&2; exit 1; }
 echo OK
