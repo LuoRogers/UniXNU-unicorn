@@ -118,6 +118,9 @@ jobs:
         ls -l "$OUT/device-tree/hardware.dtb"
 
         '
+    - name: stage Apple components (decompressed kernelcache) for the storage step
+      working-directory: device
+      run: "set -euo pipefail\nURL=$(python3 -c \"import tomllib,pathlib;print(tomllib.loads(pathlib.Path('board.toml').read_text())['ipsw']['url'])\")\necho \"ipsw: ${URL}\"\npython3 scripts/prepare-ipados18-components.py --remote --url \"$URL\" \\\n  --output-dir apple/ipados18-22H374 --only KernelCache\nSRC=apple/ipados18-22H374/components/kernelcache.release.ipad7c\nDST=apple/ipados18-22H374/components/kernelcache.release.ipad7c.decompressed/kernelcache.release.ipad7c.decompressed\nmkdir -p \"$(dirname \"$DST\")\"\npython3 scripts/decompress-ipados18-kernelcache.py --im4p \"$SRC\" --output \"$DST\"\nls -l \"$SRC\" \"$DST\"\n"
     - name: build kernel (device kit builder, MACHINE_CONFIGS=PONG)
       working-directory: device
       env:
