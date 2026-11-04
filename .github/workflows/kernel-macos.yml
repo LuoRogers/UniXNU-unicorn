@@ -98,12 +98,17 @@ jobs:
           python3.12 ./unixnu payload -D ../device
           ls -l ../UniXNU/out/unicorn/${OS_PROFILE}/unicorn_ipados18/payload/ || true
 
-      - name: build boot image (firmware volume + board DTB)
-        working-directory: UniXNU
+      # 注意：这里不能用 `unixnu bootimg`——框架那个只支持 v0–v2 头（verify() 按 v0 偏移解析），
+      # 而 unicorn 的 ABL 需要 Android boot header v4，且 ramdisk 必须是 payload
+      # （UniXNU 菜单的启动项来自 ramdisk 里的 EFI/UniXNU/Payloads/kernel.macho）。
+      # scripts/make-m3-image.sh 用固件仓的 build-bootimg.py 打 v4，并做结构自校验。
+      - name: build boot image (v4, payload as ramdisk)
+        working-directory: device
         run: |
-          python3.12 ./unixnu bootimg -D ../device --uefi ../uefi-unicorn \
-            --dtb ../UniXNU/out/unicorn/${OS_PROFILE}/unicorn_ipados18/device-tree/hardware.dtb
-          ls -l ../UniXNU/out/unicorn/${OS_PROFILE}/unicorn_ipados18/boot/ || true
+          bash scripts/make-m3-image.sh \
+            --payload ../UniXNU/out/unicorn/${OS_PROFILE}/unicorn_ipados18/payload/payload.img \
+            --out ../UniXNU/out/unicorn/${OS_PROFILE}/unicorn_ipados18/boot-m3
+          ls -l ../UniXNU/out/unicorn/${OS_PROFILE}/unicorn_ipados18/boot-m3/
 
       - name: upload artifacts
         uses: actions/upload-artifact@v4
@@ -113,6 +118,7 @@ jobs:
             UniXNU/out/unicorn/**/kernel/*
             UniXNU/out/unicorn/**/payload/*
             UniXNU/out/unicorn/**/boot/*.img
+            UniXNU/out/unicorn/**/boot-m3/*.img
             UniXNU/out/unicorn/**/device-tree/*
             UniXNU/out/unicorn/**/logs/*
           if-no-files-found: warn
