@@ -42,7 +42,7 @@ CONFIG_XNU_OWNER_ROOT_AUDIT=n
 CONFIG_XNU_OWNER_ROOT_TRUST=n
 CONFIG_XNU_OWNER_UNION_SYSTEMOS=n
 CONFIG_XNU_PONG_APFS_DEBUG=n
-CONFIG_XNU_PONG_ADRENO_PLATFORM=y
+CONFIG_XNU_PONG_ADRENO_PLATFORM=n
 CONFIG_XNU_PONG_BACKLIGHT=n
 CONFIG_XNU_PONG_POWER=y
 CONFIG_XNU_PONG_EARLY_TRACE=n
@@ -70,3 +70,6 @@ CONFIG_XNU_PONG_WIFI=n
 # 2026-11-05: 与 pong/thor 官方 defconfig 对齐——crypto 走 IPSW kernelcache 的 prelinked 组件，
 # 不用源码 corecrypto14（后者要求 build/corecrypto-2023/libcorecrypto_kernel_noasm-namespaced.a，
 # 那条链只有 pong 作者本机具备）。因此 prelink 步骤是必需的。
+
+# 2026-11-05: M3 阶段关闭 Adreno 平台包。它要求 device/out/ipados18/firmware/adreno730/*.bin
+# （从本机 vendor 分区提取的 GPU 固件），首次上机用不到；M4 接 GPU 时再补采集并打开。
