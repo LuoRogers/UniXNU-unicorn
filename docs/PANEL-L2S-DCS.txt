@@ -1,0 +1,24 @@
+# unicorn 面板：qcom,mdss_dsi_l2s_38_0c_0a_dsc_cmd（1440x3200，DSC 10bpc）
+# 来源：本机 live device tree，node /soc/.../qcom,mdss_dsi_l2s_38_0c_0a_dsc_cmd/timing@0
+# bootargs: msm_drm.dsi_display0=qcom,mdss_dsi_l2s_38_0c_0a_dsc_cmd
+
+				qcom,mdss-dsi-reset-sequence = <0x00 0x01 0x01 0x0a>;
+				qcom,mdss-dsi-panel-name = "xiaomi 38 0c 0a cmd mode dsc dsi panel";
+						qcom,mdss-dsc-block-prediction-enable;
+						qcom,mdss-dsc-bit-per-pixel = <0x08>;
+						qcom,mdss-dsc-bit-per-component = <0x0a>;
+						qcom,mdss-dsc-slice-per-pkt = <0x02>;
+						qcom,mdss-dsc-slice-width = <0x2d0>;
+						qcom,mdss-dsc-slice-height = <0x32>;
+						qcom,mdss-dsi-on-command = [39 00 00 00 00 00 81 9e 11 00 00 ab 30 80 0c 80 05 a0 00 19 02 d0 02 d0 02 00 02 68 00 20 02 be 00 0a 00 0c 04 00 03 0d 18 00 10 f0 07 10 20 00 06 0f 0f 33 0e 1c 2a 38 46 54 62 69 70 77 79 7b 7d 7e 01 02 22 00 2a 40 2a be 3a fc 3a fa 3a f8 3b 38 3b 78 3b b6 4b f6 4c 34 4c 74 5c 74 8c f4 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+						qcom,mdss-dsi-v-pulse-width = <0x08>;
+						qcom,mdss-dsi-h-pulse-width = <0x10>;
+						qcom,mdss-dsi-panel-height = <0xc80>;
+						qcom,mdss-dsi-panel-width = <0x5a0>;
+						qcom,mdss-dsi-panel-framerate = <0x3c>;
+						mi,mdss-dsi-flat-mode-off-command = [39 00 00 40 00 00 03 f0 5a 5a 39 00 00 40 00 00 04 b0 02 bb 1d 39 00 00 40 00 00 02 1d 0f 39 00 00 40 00 00 04 b0 02 b5 1d 39 00 00 40 00 00 29 1d 27 03 a4 03 5a 80 0f ff 10 73 ff 10 ff 6b 8c 2d 07 07 07 1e 1e 1e 28 28 28 2f 2f 2f 32 32 32 a4 e4 a4 08 74 80 00 00 22 39 00 00 00 00 00 03 f0 a5 a5];
+						mi,mdss-dsi-flat-mode-on-command = [39 00 00 40 00 00 03 f0 5a 5a 39 00 00 40 00 00 04 b0 02 bb 1d 39 00 00 40 00 00 02 1d 0f 39 00 00 40 00 00 04 b0 02 b5 1d 39 00 00 40 00 00 29 1d 27 23 6c 03 4e 86 0f ff 10 73 ff 10 ff 6b 8c 2d 06 07 06 1b 1f 18 24 29 20 2b 31 26 2e 34 28 a4 e4 a4 08 74 80 00 00 22 39 00 00 00 00 00 03 f0 a5 a5];
+						mi,mdss-dsi-hbm-fod-off-command = [15 00 00 40 00 00 02 53 20 39 00 00 00 00 00 03 51 07 ff];
+						mi,mdss-dsi-hbm-fod-on-command = [15 00 00 40 00 00 02 53 e0 39 00 00 00 00 00 03 51 07 ff];
+						mi,mdss-dsi-hbm-off-command = [15 00 00 40 00 00 02 53 28 39 00 00 00 00 00 03 51 07 ff];
+						mi,mdss-dsi-hbm-on-command = [15 00 00 40 00 00 02 53 e8 39 00 00 00 00 00 03 51 00 00];

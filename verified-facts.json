@@ -1,0 +1,19 @@
+{
+  "_comment": "本机实测值登记表。来源：data/unicorn-20261104-210322/（live-fdt.dts / proc-iomem / input-devices / getprop）。",
+  "device": "unicorn",
+  "verified": {
+    "dts.dram_size": "0x3 0x0 = 12 GiB @ 0x80000000（MemTotal 11444364 kB，ddr_size=0x0c）",
+    "dts.ufs_spi": "265 = 0x109（ufshc@1d84000 interrupts <0 0x109 4>）",
+    "dts.ufs_smmu_sid": "0xe0（iommus = <0x5b 0xe0 0>）",
+    "dts.pon_ppid": "0x13（pm8998-pon@1300 pwrkey interrupts <0 0x13 7 3>）",
+    "dts.touch_compatible": "focaltech fts（SPI 0x990000，IRQ GPIO 21，RESET GPIO 20，x-max 14400/y-max 32000）",
+    "userdata.first_lba": "0x2AE13BB provisional（userdata 尾部 64 GiB 起点，安装前需先收缩安卓 data）",
+    "userdata.last_lba": "0x3AE1F7A = 61731834（/sys/block/sda/sda36 start+size 换算）",
+    "uefi.fd_base": "0xA7400000（ramoops 到 0xa73fffff 后第一个空闲段，脚本校验不在任何保留区内）",
+    "uefi.fd_size": "0x300000（0xA7400000..0xA7700000）",
+    "uefi.cpu_stack_base": "0xA7700000（FD 区之后，/proc/iomem 显示 System RAM 且无保留项）",
+    "dts.touch_pins": "irq-gpio 21 / reset-gpio 20（本机 fts@0: fts,irq-gpio=<&tlmm 0x15>、fts,reset-gpio=<&tlmm 0x14>）",
+    "uefi.boot_header_version": "4（本机 boot_a.img 偏移 40 读出的 header_version）",
+    "adt.owned_memory_size": "0x100000000 = 4 GiB：DarwinBoot 的内存分配窗口，属设计选择（与 pong/thor 一致），非继承猜测"
+  }
+}

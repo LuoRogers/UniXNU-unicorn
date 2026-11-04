@@ -1,0 +1,9 @@
+{
+  "_comment": "本机实测值登记表。把 audit-inherited-values.py 报为 INHERIT 的键，用采集/实机结果确认后搬到这里，脚本即转 OK。值要来自 data/unicorn-*/ 的 dump 或上机观测，不能抄邻居设备。",
+  "device": "unicorn",
+  "verified": {
+    "userdata.first_lba": "采集自 /dev/block/by-name 与 GPT（未填）",
+    "dts.ufs_spi": "未填",
+    "uefi.fd_base": "未填"
+  }
+}
