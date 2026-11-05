@@ -75,13 +75,19 @@ patches = [
 ]
 packages = [
   "{uefi}",
+  # 关键顺序：`{uefi}/Platforms/Xiaomi` 必须在 `{tree}/package` 之前。
+  # 两个目录都提供 UniXNUPkg，EDK2 按 PACKAGES_PATH 顺序解析相对路径；
+  # 框架仓 package/UniXNUPkg 里的 UniXNURamDiskDxe 是旧版（遇到 ABL 把
+  # boot.img ramdisk 与 vendor_boot ramdisk 拼在一起、总长不是 512 整数倍时
+  # 直接放弃，导致 payload FAT 没被发布 → 读不到 unixnu.toml → 退回内置配置）。
+  # uefi-unicorn 里的这份会逐字节扫描 FAT 引导扇区并向下取整尾部，正好治这个。
+  "{uefi}/Platforms/Xiaomi",
   "{tree}/package",
   # 固件自带的 DarwinBoot 包（由 uefi-mondrian 继承而来，路径稳定、不依赖设备仓 submodule）。
   # TODO(darwin24): darwin24 的 boot_args ABI 是 0x480/1024，Pong 的 DarwinBoot24 变体在
   # kits/PongPlatform24 里；换成它需要先拉设备仓 drivers/ 的 submodule。
   "{uefi}/Platforms/Xiaomi/DarwinBootPkg",
   "{edk2}",
-  "{uefi}/Platforms/Xiaomi",
   "{uefi}/Common/Mu",
   "{uefi}/Common/Mu_OEM_Sample",
   "{uefi}/Silicon/Qualcomm",
