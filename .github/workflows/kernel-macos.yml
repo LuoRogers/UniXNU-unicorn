@@ -190,6 +190,8 @@ jobs:
         retention-days: 14
     needs: userdata
     if: always() && (needs.userdata.result == 'success' || inputs.volume_layout_run != '')
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   userdata:
     name: userdata image (macOS)
     runs-on: macos-15-intel
@@ -259,3 +261,5 @@ jobs:
 
           '
     if: inputs.volume_layout_run == ''
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
