@@ -1,0 +1,53 @@
+[os]
+name = "ipados-16.6.1-20G81"
+darwin = "22.6.0"
+xnu_version = "8796.141.3"
+xnu_revision = "1b191cb58250d0705d8a51287127505aa4bc0789"
+driverkit_tag = "xnu-8796.101.5"
+trustcache_tag = "xnu-8796.101.5"
+abi = ["Darwin22-arm64-4KiB", "IOGPUFamily-20G81", "IOHIDFamily-20G81", "IOAudio2Family-20G81", "IOMobileGraphicsFamily-20G81"]
+[ipsw]
+url = "https://updates.cdn-apple.com/2023SummerFCS/fullrestores/042-44571/B4A5346C-A13B-41EA-8F0D-B3379DABFE22/iPad_10.2_16.6.1_20G81_Restore.ipsw"
+product = "iPad7,11"
+version = "16.6.1"
+build = "20G81"
+device_class = "j171ap"
+chip_id = 32784
+board_id = 28
+fetch = ["KernelCache", "DeviceTree", "StaticTrustCache", "Cryptex1,SystemOS", "Cryptex1,SystemTrustCache", "Cryptex1,AppOS", "Cryptex1,AppTrustCache", "OS"]
+
+[adt.root.string]
+model = "iPhone17,1"
+target-type = "J171"
+target-sub-type = "J171AP"
+[adt.root.strings]
+compatible = ["J171AP", "iPhone17,1"]
+[adt.chosen.string]
+osenvironment = "main"
+crypto-hash-method = "sha2-384"
+psci-method = "smc"
+[adt.chosen.u32]
+debug-enabled = 1
+mix-n-match-prevention-status = 0
+[adt.product.string]
+product-name = "iPhone 16 Pro"
+product-description = "iPhone 16 Pro"
+artwork-device-idiom = "phone"
+artwork-display-gamut = "sRGB"
+compatible-device-fallback = "iPhone17,1"
+[adt.product.u32]
+artwork-device-subtype = 2622
+artwork-scale-factor = 3
+device-perf-memory-class = 3
+[adt.defaults.u32]
+sleep-disabled = 1
+
+[userdata]
+# Disk images of this OS, in window order; the device sets the partition geometry
+# (board.toml [userdata]) and the volume UUIDs of the image it writes.
+# `unixnu userdata` writes these two windows and nothing else, which this board's
+# NativeUfs transport does not accept: it requires a "Data" window and reads the
+# manifest as version 1 only. scripts/prepare-ipados18-ufs-layout.py therefore
+# builds the three-window directory the image is made from, and this table records
+# what the profile contributes to it. See the packaging area of porting.toml.
+windows = [{ name = "OS", component = "OS" }, { name = "SystemOS", component = "Cryptex1,SystemOS", optional = true }]
