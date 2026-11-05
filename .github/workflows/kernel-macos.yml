@@ -10,6 +10,7 @@ name: kernel-macos
         options:
         - ipados-18.7.10-22H374
       prelink:
+        - ipados-16.6.1-20G81
         description: 是否做 prelink（首次先 false，用原生内核）
         required: true
         default: false
