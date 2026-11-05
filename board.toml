@@ -114,7 +114,9 @@ tools = true
 timeout = 15
 # 把 panic() 的信息直接画到屏幕上（patch-xnu-entry-probe.py --panic-screen）。
 # XNU 阶段没有别的日志通道，屏幕上能读到 panic 字符串是唯一可靠的现场证据。
-panic_screen = true
+#panic_screen = true   # 暂时关闭：patch-xnu-entry-probe.py 的跳板要写进内核 padding，
+#                      # 而 prelink 之后那段 padding 已被占用（"Padding at … is not empty"）。
+#                      # 正确做法是把补丁打在 prelink 之前的原始聚合内核上，待验证。
 # The current runtime arguments this board brings up with: the ones scripts/build-ipados18-prelinked-boot.py
 # used to write, minus its boot-epoch (the ADT carries a software clock instead) and with the
 # applog list trimmed to the services the trace reads. DarwinBoot copies the line into a
