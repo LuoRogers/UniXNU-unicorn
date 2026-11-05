@@ -64,6 +64,24 @@ def main():
     for line in config_path.read_text().splitlines():
         if line.startswith('CONFIG_XNU_'):
             key,value=line.removeprefix('CONFIG_').split('=',1);env[key]={'y':'1','n':'0'}.get(value,value.strip('"'))
+    # The resolved .config is filtered by the shared configuration schema, so
+    # kit-only keys (CONFIG_XNU_PONG_*) never reach it. The device defconfig is
+    # the authority for this board: fill in whatever the resolved file omitted.
+    import tomllib
+    _defconfig_defaults = {}
+    try:
+        _board = tomllib.loads((DEVICE / 'board.toml').read_text())
+        _name = _board.get('kernel', {}).get('defconfig')
+        _path = DEVICE / 'configs' / _name if _name else None
+        if _path and _path.is_file() and _path.resolve() != config_path.resolve():
+            for _line in _path.read_text().splitlines():
+                if _line.startswith('CONFIG_XNU_'):
+                    _k, _v = _line.removeprefix('CONFIG_').split('=', 1)
+                    _defconfig_defaults[_k] = {'y': '1', 'n': '0'}.get(_v, _v.strip('"'))
+            for _k, _v in _defconfig_defaults.items():
+                env.setdefault(_k, _v)
+    except Exception as exc:  # a missing board.toml must not change today's behaviour
+        print('defconfig defaults skipped:', exc, flush=True)
     # Only the board-specific archive has a matching 22H374 binding profile.
     # Other legacy display/AIR archives remain excluded.
     legacy_gpu = ('XNU_NATIVE_ADRENO',
