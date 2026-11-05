@@ -26,7 +26,7 @@ fetch = ["KernelCache", "DeviceTree", "StaticTrustCache", "Cryptex1,SystemOS", "
 # This is the community Pong A730/QCA6490/Darwin24 implementation, not the A740/WCN7850 source.
 # The kit lives in this repository at kits/PongPlatform24 and declares no archive recipe: the
 # kernel step of this board builds the aggregate itself, see [kernel] below.
-include = ["PongPlatform24"]
+include = ["PongPlatform24", "XnuPrelink"]
 # XnuPrelink 是组件目录里的工具型 kit（scope="tool", build_stage="prelink"）。
 # 不放进 include，unixnu tree 就不会把它链接到 tree/kits/XnuPrelink，
 # [kernel.prelink] 里的 tool 路径就不存在 —— prelink 会静默失败（产物看似成功但没有 kext）。
@@ -41,7 +41,7 @@ config_fragments = ["arch:configs/common.config", "soc:configs/sm8475.config", "
 patch_series = ["device:migration/format2/arch-darwin24.series", "soc:patches/xnu/series", "os:patches/xnu/series", "device:patches/xnu-ipados18/series"]
 # Explicitly empty: an array here replaces the arch profile's list, and its
 # archive builders produce the BCM2837 providers, not this board's aggregate.
-archives = []
+archives = ["component:PongPlatform24"]
 # The Darwin 24 aggregate is compiled with MACHINE_CONFIGS=PONG (config/MASTER.arm64.pong, added
 # by patches/xnu-ipados18), not with the BCM2837 machine config the shared kernel step selects.
 # Folding that into the shared step is open; see the packaging area of porting.toml.
