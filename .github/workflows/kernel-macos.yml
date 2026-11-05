@@ -144,7 +144,15 @@ jobs:
       working-directory: UniXNU
       env:
         UNIXNU_UNIQUE_CHIP_ID: ${{ secrets.UNIXNU_UNIQUE_CHIP_ID }}
-      run: 'OUT=../UniXNU/out/unicorn/${OS_PROFILE}/unicorn_ipados18
+      run: '# patch-xnu-entry-probe.py 需要 llvm-nm；Xcode 自带，但不在默认 PATH。
+
+        NM=$(xcrun -f llvm-nm 2>/dev/null || true)
+
+        if [ -n "${NM:-}" ]; then mkdir -p "$RUNNER_TEMP/nmbin"; ln -sf "$NM" "$RUNNER_TEMP/nmbin/llvm-nm"; export PATH="$RUNNER_TEMP/nmbin:$PATH"; fi
+
+        llvm-nm --version 2>/dev/null | head -1 || echo "llvm-nm 不可用"
+
+        OUT=../UniXNU/out/unicorn/${OS_PROFILE}/unicorn_ipados18
 
         AGG="$OUT/tree/build/xnu/ios-obj/DEVELOPMENT_ARM64_PONG/mach.development.pong"
 
