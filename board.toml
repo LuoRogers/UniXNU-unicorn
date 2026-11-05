@@ -47,7 +47,7 @@ archives = ["component:PongPlatform24"]
 [kernel.prelink]
 # The native aggregate the recipe leaves at this path, and the prelinker this
 # board carried before the format 2 rewrite.
-tool = "kits/NativePrelink/emit_prelink.py"
+tool = "kits/XnuPrelink/emit_prelink.py"
 kernel = "build/xnu/ios-obj/DEVELOPMENT_ARM64_PONG/mach.development.pong"
 # The slide is the one the 21H461 profile qualifies; this board's fixed base
 # comes from the 22H374 storage bindings and is not yet expressed as a slide
