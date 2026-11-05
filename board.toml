@@ -170,7 +170,11 @@ kernel_args = [
 # schema_version 2 builds the ADT from the hardware DTS through devicetree.generate(); these keys
 # are the ones that function reads from [payload.adt]. The DarwinBoot allocation window is 4 GiB,
 # the window the first bring-up boot used.
-owned_memory_size = "0x100000000"
+owned_memory_size = "0x30000000"
+# 768 MiB。真机上 4 GiB 的窗口分配不出来（DarwinBoot 报 EFI_OUT_OF_RESOURCES /
+# PRIMARY RAM）：本机 FD 在 0xA7400000、DTB 0xB094F000、initrd 到 0xB7FFE938，
+# 4 GiB 以下只剩约 1.1 GiB 连续空闲。先让 M3 通过，之后再靠“多 RAM bank”
+# （AllocateWindow 之外的 ClaimPongRam 路径）把高地址内存喂给 XNU。
 # The restore's own disk images are used unmodified, so /chosen/RAMDisk holds only the seed; the
 # three volumes come from the userdata image and XNU mounts them through the UFS root driver.
 packed_data_ramdisk = false
