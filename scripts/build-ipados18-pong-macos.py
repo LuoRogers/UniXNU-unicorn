@@ -67,7 +67,6 @@ def main():
     # The resolved .config is filtered by the shared configuration schema, so
     # kit-only keys (CONFIG_XNU_PONG_*) never reach it. The device defconfig is
     # the authority for this board: fill in whatever the resolved file omitted.
-    import tomllib
     _defconfig_defaults = {}
     try:
         _board = tomllib.loads((DEVICE / 'board.toml').read_text())
