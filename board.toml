@@ -112,6 +112,9 @@ size_mib = 96
 tools = true
 # 菜单倒计时 15 秒（默认 3 秒）：正常验收时够快，排查时来得及按键进 Tools → Advanced Logger。
 timeout = 15
+# 把 panic() 的信息直接画到屏幕上（patch-xnu-entry-probe.py --panic-screen）。
+# XNU 阶段没有别的日志通道，屏幕上能读到 panic 字符串是唯一可靠的现场证据。
+panic_screen = true
 # The current runtime arguments this board brings up with: the ones scripts/build-ipados18-prelinked-boot.py
 # used to write, minus its boot-epoch (the ADT carries a software clock instead) and with the
 # applog list trimmed to the services the trace reads. DarwinBoot copies the line into a
