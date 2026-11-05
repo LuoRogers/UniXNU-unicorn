@@ -26,7 +26,10 @@ fetch = ["KernelCache", "DeviceTree", "StaticTrustCache", "Cryptex1,SystemOS", "
 # This is the community Pong A730/QCA6490/Darwin24 implementation, not the A740/WCN7850 source.
 # The kit lives in this repository at kits/PongPlatform24 and declares no archive recipe: the
 # kernel step of this board builds the aggregate itself, see [kernel] below.
-include = ["PongPlatform24"]
+include = ["PongPlatform24", "XnuPrelink"]
+# XnuPrelink 是组件目录里的工具型 kit（scope="tool", build_stage="prelink"）。
+# 不放进 include，unixnu tree 就不会把它链接到 tree/kits/XnuPrelink，
+# [kernel.prelink] 里的 tool 路径就不存在 —— prelink 会静默失败（产物看似成功但没有 kext）。
 
 [device_tree]
 source = "device:dts/unicorn.dts"
@@ -107,6 +110,8 @@ volume = "UNIXNU"
 size_mib = 96
 # 让生成的启动菜单带上 Tools（→ Advanced Logger），用它把固件日志导出成 QR。
 tools = true
+# 菜单倒计时 15 秒（默认 3 秒）：正常验收时够快，排查时来得及按键进 Tools → Advanced Logger。
+timeout = 15
 # The current runtime arguments this board brings up with: the ones scripts/build-ipados18-prelinked-boot.py
 # used to write, minus its boot-epoch (the ADT carries a software clock instead) and with the
 # applog list trimmed to the services the trace reads. DarwinBoot copies the line into a
