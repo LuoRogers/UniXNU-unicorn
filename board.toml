@@ -7,7 +7,7 @@ soc_source = "sm8475"
 # The 22H374 profile ships in this repository at os-profiles/ and is installed into the
 # UniXNU checkout before resolving (scripts/install-device-profile.py), because
 # UniXNU/profiles/os/ has no 18.x profile yet.
-os_profile = "ipados-16.6.1-20G81"
+os_profile = "ipados-18.7.10-22H374"
 description = "Xiaomi 12S Pro (unicorn, SM8475): UniXNU UEFI bring-up"
 kit = "unicorn"
 
@@ -26,7 +26,7 @@ fetch = ["KernelCache", "DeviceTree", "StaticTrustCache", "Cryptex1,SystemOS", "
 # This is the community Pong A730/QCA6490/Darwin24 implementation, not the A740/WCN7850 source.
 # The kit lives in this repository at kits/PongPlatform24 and declares no archive recipe: the
 # kernel step of this board builds the aggregate itself, see [kernel] below.
-include = ["PongPlatform24", "XnuPrelink"]
+include = ["PongPlatform24"]
 # XnuPrelink 是组件目录里的工具型 kit（scope="tool", build_stage="prelink"）。
 # 不放进 include，unixnu tree 就不会把它链接到 tree/kits/XnuPrelink，
 # [kernel.prelink] 里的 tool 路径就不存在 —— prelink 会静默失败（产物看似成功但没有 kext）。
@@ -36,13 +36,12 @@ source = "device:dts/unicorn.dts"
 include_dirs = ["soc:dts"]
 
 [kernel]
-defconfig = "unicorn_k60_defconfig"
+defconfig = "unicorn_ipados18_defconfig"
 config_fragments = ["arch:configs/common.config", "soc:configs/sm8475.config", "os:configs/ipados.config"]
-patch_series = ["device:patches/xnu/series"]
-driver_records = "DEVELOPMENT_ARM64_PONG"
+patch_series = ["device:migration/format2/arch-darwin24.series", "soc:patches/xnu/series", "os:patches/xnu/series", "device:patches/xnu-ipados18/series"]
 # Explicitly empty: an array here replaces the arch profile's list, and its
 # archive builders produce the BCM2837 providers, not this board's aggregate.
-archives = ["component:PongPlatform24"]
+archives = []
 # The Darwin 24 aggregate is compiled with MACHINE_CONFIGS=PONG (config/MASTER.arm64.pong, added
 # by patches/xnu-ipados18), not with the BCM2837 machine config the shared kernel step selects.
 # Folding that into the shared step is open; see the packaging area of porting.toml.
@@ -87,7 +86,7 @@ packages = [
   # 固件自带的 DarwinBoot 包（由 uefi-mondrian 继承而来，路径稳定、不依赖设备仓 submodule）。
   # TODO(darwin24): darwin24 的 boot_args ABI 是 0x480/1024，Pong 的 DarwinBoot24 变体在
   # kits/PongPlatform24 里；换成它需要先拉设备仓 drivers/ 的 submodule。
-  "{uefi}/Platforms/Xiaomi/DarwinBoot22",
+  "{uefi}/Platforms/Xiaomi/DarwinBootPkg",
   "{edk2}",
   "{uefi}/Common/Mu",
   "{uefi}/Common/Mu_OEM_Sample",
@@ -96,8 +95,6 @@ packages = [
   "{uefi}/Silicium-ACPI",
   "{uefi}/Silicium-ACPI/Platforms/Xiaomi",
   "{uefi}/Silicium-ACPI/Silicon/Qualcomm",
-  # 高通厂商 DXE 二进制（USB 设备栈等）；depex 不满足的模块不会加载
-  "{uefi}/Binaries/pong",
 ]
 
 [firmware.defines]
@@ -205,7 +202,6 @@ unixnu = "../UniXNU"
 
 [package.defconfig]
 "ipados-18.7.10-22H374" = "unicorn_ipados18_defconfig"
-"ipados-16.6.1-20G81"     = "unicorn_k60_defconfig"
 
 [bootimg]
 # Compiled by scripts/build-pong-hardware-dtb.py at the firmware preflight step, relative to the
