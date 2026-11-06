@@ -1,0 +1,53 @@
+diff --git a/osfmk/arm64/arm_vm_init.c b/osfmk/arm64/arm_vm_init.c
+index 27157d6..3fcd06c 100644
+--- a/osfmk/arm64/arm_vm_init.c
++++ b/osfmk/arm64/arm_vm_init.c
+@@ -51,6 +51,28 @@
+ 
+ #include <san/kasan.h>
+ 
++/*
++ * Unicorn bring-up breadcrumb (VM init phase).  Same idea as arm_init.c's
++ * unicorn_stage(): paint a 32x32 square at the framebuffer's physical address.
++ * Only valid before set_mmu_ttb_alternate() replaces the identity map.
++ */
++static void
++unicorn_stage_vm(unsigned int slot, unsigned int argb)
++{
++	volatile unsigned int *fb = (volatile unsigned int *)(unsigned long)0xB8000000UL;
++	unsigned int stride = 5760u / 4u;
++	unsigned int y = 240u + slot * 80u;
++	unsigned int dy, dx;
++
++	for (dy = 0u; dy < 32u; dy++) {
++		for (dx = 0u; dx < 32u; dx++) {
++			fb[(y + dy) * stride + 64u + dx] = argb;
++		}
++	}
++	__asm__ volatile ("dsb sy" ::: "memory");
++}
++
++
+ #if __ARM_KERNEL_PROTECT__
+ /*
+  * If we want to support __ARM_KERNEL_PROTECT__, we need a sufficient amount of
+@@ -2021,9 +2043,11 @@ arm_vm_init(uint64_t memory_size, boot_args * args)
+ 	 * in units of the hardware page size and should not need similar treatment.
+ 	 */
+ 	gPhysSize = mem_size = ((gPhysBase + args->memSize) & ~PAGE_MASK) - gPhysBase;
++	unicorn_stage_vm(8, 0xFF00A5FF); /* arm_vm_init entered */
+ 
+ #if defined(PONG)
+     pong_ram_init(args);
++	unicorn_stage_vm(9, 0xFF00FF7F); /* pong_ram_init returned */
+     if (memory_size && memory_size < pong_ram_bytes) {
+         uint64_t remaining = memory_size & ~PAGE_MASK;
+         unsigned kept = 0;
+@@ -2367,6 +2391,7 @@ arm_vm_init(uint64_t memory_size, boot_args * args)
+ 	arm_set_user_tbi();
+ 
+ 	arm_vm_physmap_init(args);
++	unicorn_stage_vm(10, 0xFFFF00FF); /* bootstrap tables built, about to switch */
+ 	set_mmu_ttb_alternate(cpu_ttep & TTBR_BADDR_MASK);
+ 
+ #if XNU_MONITOR
