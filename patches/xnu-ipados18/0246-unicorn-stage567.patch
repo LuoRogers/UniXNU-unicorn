@@ -1,0 +1,59 @@
+diff --git a/osfmk/arm/arm_init.c b/osfmk/arm/arm_init.c
+index 77b178c..3011857 100644
+--- a/osfmk/arm/arm_init.c
++++ b/osfmk/arm/arm_init.c
+@@ -351,6 +351,30 @@ arm_setup_pre_sign(void)
+ 
+ __startup_func
+ void
++/*
++ * Unicorn bring-up breadcrumb.
++ *
++ * Paints a 32x32 ARGB square straight into the framebuffer through its
++ * PHYSICAL address; only safe while the kernel still runs on the identity
++ * map (before arm_vm_init switches to the final tables).  Geometry is this
++ * board's: 0xB8000000, 1440x3200, 5760 bytes per row.
++ */
++static void
++unicorn_stage(uint32_t slot, uint32_t argb)
++{
++	volatile uint32_t *fb = (volatile uint32_t *)(uintptr_t)0xB8000000ULL;
++	const uint32_t stride = 5760u / 4u;
++	uint32_t y = 240u + slot * 80u;
++	uint32_t dy, dx;
++
++	for (dy = 0; dy < 32u; dy++) {
++		for (dx = 0; dx < 32u; dx++) {
++			fb[(y + dy) * stride + 64u + dx] = argb;
++		}
++	}
++	__asm__ volatile ("dsb sy" ::: "memory");
++}
++
+ arm_init(
+ 	boot_args       *args)
+ {
+@@ -381,6 +405,7 @@ arm_init(
+ #endif /* defined(HAS_APPLE_PAC) */
+ 
+ 	PE_init_platform(FALSE, args); /* Get platform expert set up */
++	unicorn_stage(5, 0xFF00FF00); /* reached: PE_init_platform returned */
+ 
+ #if __arm64__
+ 	configure_timer_apple_regs();
+@@ -404,6 +429,7 @@ arm_init(
+ 	}
+ 
+ 	platform_stall_panic_or_spin(PLATFORM_STALL_XNU_LOCATION_ARM_INIT);
++	unicorn_stage(6, 0xFFFF8000); /* reached: past chosen/stall */
+ 
+ 	chosen = NULL; // Force a re-lookup later on since VM addresses are not final at this point
+ 	dt_entry_size = 0;
+@@ -575,6 +601,7 @@ arm_init(
+ 	gDramSize = *dram_size;
+ 	pmap_first_pnum = (ppnum_t)atop(gDramBase);
+ 
++	unicorn_stage(7, 0xFF8000FF); /* reached: about to call arm_vm_init */
+ 	arm_vm_init(xmaxmem, args);
+ 
+ #if defined(PONG) && defined(XNU_PONG_RAMOOPS_CONSOLE) && XNU_PONG_RAMOOPS_CONSOLE
