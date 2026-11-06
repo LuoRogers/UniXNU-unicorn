@@ -1,11 +1,11 @@
 diff --git a/osfmk/arm/arm_init.c b/osfmk/arm/arm_init.c
-index 77b178c..f55dfae 100644
+index 77b178c..fe5232a 100644
 --- a/osfmk/arm/arm_init.c
 +++ b/osfmk/arm/arm_init.c
-@@ -351,6 +351,28 @@ arm_setup_pre_sign(void)
+@@ -212,6 +212,29 @@ extern void configure_late_apple_regs(bool cold_boot);
+ #define dyldLogFunc(msg, ...)
+ #include <mach/dyld_kernel_fixups.h>
  
- __startup_func
- void
 +/*
 + * Unicorn bring-up breadcrumb: paint a 32x32 square straight into the
 + * framebuffer through its physical address.  Only safe while the kernel still
@@ -28,10 +28,11 @@ index 77b178c..f55dfae 100644
 +	__asm__ volatile ("dsb sy" ::: "memory");
 +}
 +
- arm_init(
- 	boot_args       *args)
- {
-@@ -381,6 +403,7 @@ arm_init(
++
+ extern uint32_t __thread_starts_sect_start[] __asm("section$start$__TEXT$__thread_starts");
+ extern uint32_t __thread_starts_sect_end[]   __asm("section$end$__TEXT$__thread_starts");
+ #if defined(HAS_APPLE_PAC)
+@@ -381,6 +404,7 @@ arm_init(
  #endif /* defined(HAS_APPLE_PAC) */
  
  	PE_init_platform(FALSE, args); /* Get platform expert set up */
@@ -39,7 +40,7 @@ index 77b178c..f55dfae 100644
  
  #if __arm64__
  	configure_timer_apple_regs();
-@@ -404,6 +427,7 @@ arm_init(
+@@ -404,6 +428,7 @@ arm_init(
  	}
  
  	platform_stall_panic_or_spin(PLATFORM_STALL_XNU_LOCATION_ARM_INIT);
@@ -47,7 +48,7 @@ index 77b178c..f55dfae 100644
  
  	chosen = NULL; // Force a re-lookup later on since VM addresses are not final at this point
  	dt_entry_size = 0;
-@@ -575,6 +599,7 @@ arm_init(
+@@ -575,6 +600,7 @@ arm_init(
  	gDramSize = *dram_size;
  	pmap_first_pnum = (ppnum_t)atop(gDramBase);
  
