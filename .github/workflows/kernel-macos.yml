@@ -78,13 +78,12 @@ jobs:
 
         '
     - name: install build tools
-      run: 'brew install --quiet cmake ninja unifdef dtc lzfse mtools lld
-
-        export PATH="/usr/local/opt/lld/bin:$PATH"
+      run: |
+        set -euo pipefail
+        brew install --quiet cmake ninja unifdef dtc lzfse mtools lld
         for t in cmake ninja unifdef dtc lzfse mformat; do command -v "$t" || exit 1; done
-        command -v ld.lld || { echo 'ld.lld missing'; exit 1; }
-
-        '
+        export PATH="/usr/local/opt/lld/bin:$PATH"
+        command -v ld.lld || command -v /usr/local/opt/llvm/bin/ld.lld
     - name: pin baseline machine config (BCM2837 -> PONG)
       working-directory: device
       run: 'bash scripts/pin-baseline-machine-config.sh ../UniXNU
