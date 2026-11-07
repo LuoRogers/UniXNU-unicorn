@@ -80,9 +80,9 @@ jobs:
     - name: install build tools
       run: |
         set -euo pipefail
-        brew install --quiet cmake ninja unifdef dtc lzfse mtools lld
+        brew install --quiet cmake ninja unifdef dtc lzfse mtools lld llvm
         for t in cmake ninja unifdef dtc lzfse mformat; do command -v "$t" || exit 1; done
-        export PATH="/usr/local/opt/lld/bin:$PATH"
+        export PATH="/usr/local/opt/lld/bin:/usr/local/opt/llvm/bin:$PATH"
         command -v ld.lld || command -v /usr/local/opt/llvm/bin/ld.lld
     - name: pin baseline machine config (BCM2837 -> PONG)
       working-directory: device

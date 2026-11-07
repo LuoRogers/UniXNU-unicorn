@@ -83,7 +83,7 @@ def main() -> int:
     objcopy = _tool('llvm-objcopy', ('/usr/local/opt/llvm/bin/llvm-objcopy',
                                      '/opt/homebrew/opt/llvm/bin/llvm-objcopy'))"""
     if tool_block_old in s:
-        s = s.replace(tool_block_old, tool_block_new, 1)
+        s = s.replace(tool_block_old, tool_block_new)
         changed += 1
     if "    return names" in s and "executable zero run" not in s:
         s = s.replace("    return names", DISCOVERY + "    return names", 1)
