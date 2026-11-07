@@ -20,6 +20,21 @@ name: kernel-macos
         required: false
         default: ''
         type: string
+      probe_symbol:
+        description: stage-4 reset probe：在 _arm_init 里调用该符号之后复位（留空则用默认 stage 3）
+        required: false
+        default: ''
+        type: string
+      probe_in:
+        description: stage-4 probe：包含该调用的函数（默认 _arm_init）
+        required: false
+        default: _arm_init
+        type: string
+      probe_occurrence:
+        description: stage-4 probe：第几次调用（默认 1）
+        required: false
+        default: '1'
+        type: string
 permissions:
   contents: read
   actions: read
@@ -146,6 +161,10 @@ jobs:
     - name: patch the aggregate for on-screen panics (best effort)
       continue-on-error: true
       working-directory: device
+      env:
+        PROBE_SYMBOL: ${{ inputs.probe_symbol }}
+        PROBE_IN: ${{ inputs.probe_in }}
+        PROBE_OCCURRENCE: ${{ inputs.probe_occurrence }}
       run: 'OUT=../UniXNU/out/unicorn/${OS_PROFILE}/unicorn_ipados18
 
         AGG="$OUT/tree/build/xnu/ios-obj/DEVELOPMENT_ARM64_PONG/mach.development.pong"
@@ -158,7 +177,11 @@ jobs:
 
         # prelink 之后内核 padding 已被 kext 占用，补丁会报 "Padding ... is not empty"。
 
-        python3 "$OUT/tree/scripts/patch-xnu-entry-probe.py" "$AGG"
+        ARGS=( "$AGG" )
+        if [ -n "${PROBE_SYMBOL:-}" ]; then
+          ARGS+=( --reset-after "$PROBE_SYMBOL" --in "${PROBE_IN:-_arm_init}" --occurrence "${PROBE_OCCURRENCE:-1}" )
+        fi
+        python3 "$OUT/tree/scripts/patch-xnu-entry-probe.py" "${ARGS[@]}"
 
         ls -l "$AGG"
 
