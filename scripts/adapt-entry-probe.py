@@ -68,12 +68,29 @@ def main() -> int:
     if "AFTER_MMU_VA: 0xD2A00600" in s:
         s = s.replace("AFTER_MMU_VA: 0xD2A00600", "AFTER_MMU_VA: 0xD5033FDF", 1)
         changed += 1
+    tool_block_old = """    clang = shutil.which('clang') or '/opt/homebrew/opt/llvm/bin/clang'
+    lld = shutil.which('ld.lld') or '/opt/homebrew/opt/llvm/bin/ld.lld'
+    objcopy = shutil.which('llvm-objcopy') or '/opt/homebrew/opt/llvm/bin/llvm-objcopy'"""
+    tool_block_new = """    def _tool(name, extra=()):
+        for candidate in (shutil.which(name), *extra):
+            if candidate and Path(candidate).exists():
+                return candidate
+        return name
+
+    clang = _tool('clang', ('/usr/bin/clang',))
+    lld = _tool('ld.lld', ('/usr/local/opt/lld/bin/ld.lld', '/usr/local/opt/llvm/bin/ld.lld',
+                           '/opt/homebrew/opt/llvm/bin/ld.lld'))
+    objcopy = _tool('llvm-objcopy', ('/usr/local/opt/llvm/bin/llvm-objcopy',
+                                     '/opt/homebrew/opt/llvm/bin/llvm-objcopy'))"""
+    if tool_block_old in s:
+        s = s.replace(tool_block_old, tool_block_new, 1)
+        changed += 1
     if "    return names" in s and "executable zero run" not in s:
         s = s.replace("    return names", DISCOVERY + "    return names", 1)
         changed += 1
     p.write_text(s)
     print(f"entry-probe patcher adapted ({changed} edit(s))")
-    if changed < 4:
+    if changed < 5:
         print("warning: fewer edits than expected; the pinned tool may have changed", file=sys.stderr)
     return 0
 
