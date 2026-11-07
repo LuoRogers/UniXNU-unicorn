@@ -137,7 +137,7 @@ jobs:
         UNIXNU_DEVICE: ${{ github.workspace }}/device
         JOBS: 4
       run: "OUT=../UniXNU/out/unicorn/${OS_PROFILE}/unicorn_ipados18\necho \"== 关键开关（.config 里没有就由 device defconfig 兜底）==\"\ngrep -E 'PONG_(POWER|WIFI|BACKLIGHT|APFS_DEBUG|ADRENO_PLATFORM)|OWNER_CACHE_MOUNT' \"$OUT/.config\" || echo \"(.config 不含 PONG_* 键)\"\nset +e\npython3 kits/PongPlatform24/build-kernel.py \\\n    --artifact-dir \"$OUT/kernel\" \\\n    --tree \"$OUT/tree\" \\\n    --config-path \"$OUT/.config\" \\\n    --hardware-dtb \"$OUT/device-tree/hardware.dtb\" \\\n    --jobs 4\nrc=$?\nif [ $rc -ne 0 ]; then\n  echo \"=== kit builder failed (rc=$rc); inner build log tail ===\"\n  LOG=$(ls -t ../build/unicorn/build-*.log 2>/dev/null | head -1)\n  if [ -n \"${LOG:-}\" ]; then echo \"log: $LOG\"; tail -120 \"$LOG\"; else echo \"no inner build log\"; fi\n  exit $rc\nfi\nls -l \"$OUT/kernel\" || true\nls -l \"$OUT/tree/build/xnu/ios-obj/DEVELOPMENT_ARM64_PONG/\" | head -20 || true\n"
-    - name: relax the entry-probe signature for this kernel
+    - name: adapt the entry-probe patcher to this kernel
       working-directory: device
       run: |
         OUT=../UniXNU/out/unicorn/${OS_PROFILE}/unicorn_ipados18
@@ -151,8 +151,33 @@ jobs:
             "if (instruction(va) == 0xD5181000 and\n                    instruction(va + 4) == 0xD5033FDF):")
         s = s.replace("AFTER_MMU_VA = MMU_ENABLE_VA + 0x20", "AFTER_MMU_VA = MMU_ENABLE_VA + 4")
         s = s.replace("AFTER_MMU_VA: 0xD2A00600", "AFTER_MMU_VA: 0xD5033FDF")
+        discovery = """    # This kernel's entry body is code, not the zero padding the original tool
+    # assumed. Locate an executable zero run and put the probe caves there.
+    need = 0x2400
+    zeros = bytes(need)
+    found = None
+    for vmaddr, vmsize, fileoff, filesize in SEGMENTS:
+        span = min(vmsize, filesize)
+        end = fileoff + span - need
+        if end <= fileoff:
+            continue
+        idx = data.find(zeros, fileoff, end)
+        while idx != -1:
+            if ((idx - fileoff) % 16) == 0:
+                found = vmaddr + (idx - fileoff)
+                break
+            idx = data.find(zeros, idx + 16, end)
+        if found:
+            break
+    if not found:
+        raise SystemExit('no executable zero run for the entry probes')
+    CAVES = {stage: found + (stage - 1) * CAVE_SIZE for stage in (1, 2, 3, 4)}
+    PANIC_CAVE_END = found + need
+"""
+        if "    return names" in s and "executable zero run" not in s:
+            s = s.replace("    return names", discovery + "    return names", 1)
         p.write_text(s)
-        print('entry-probe signature relaxed')
+        print('entry-probe patcher adapted')
         PY
     - name: patch the aggregate for on-screen panics (best effort)
       continue-on-error: true
