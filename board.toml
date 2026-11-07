@@ -185,15 +185,17 @@ unique_chip_id = "required"
 chip_id = "0x8010"
 
 [userdata]
-# 实测（本机 /sys/block/sda/sda36/{start,size}，512B 扇区）：
+# 实测（本机 e2f6ecfa，/sys/block/sda/sda36/{start,size}，512B 扇区）：
 #   start = 24104960 -> 4096B LBA 3013120
-#   size  = 469749720 -> 58718715 个 4K 块，末 LBA 61731834
+#   size  = 969592792 -> 121199099 个 4K 块（462.3 GiB，本机为 512 GB SKU），末 LBA 124212218
+# 注意：仓库原值是另一台 256 GB unicorn 的实测值（58718715 个 4K 块 / 末 LBA 61731834），
+# 本机 512 GB，几何更大；写 userdata 前必须用本表，否则窗口会落错位置。
 # 窗口规划：UniXNU 的 OS / SystemOS / Data 三个窗口放在 userdata 的**尾部 64 GiB**，
 # 这样安卓自己的 /data 仍在前面生长，互不覆盖。
 #   TODO(resize)：安装前必须先收缩安卓 userdata 的文件系统，再提交窗口表；
 #   未收缩就写入会破坏安卓数据（mondrian 的教训）。
-first_lba = 0x2AE13BB      # 44954619 = 61731834 - 64GiB/4096 + 1（尾部 64 GiB 起点，provisional）
-last_lba = 0x3AE1F7A       # 61731834 = userdata 末 LBA（实测）
+first_lba = 0x66753FB      # 107435003 = 124212218 - 64GiB/4096 + 1（尾部 64 GiB 起点，provisional）
+last_lba = 0x76753FA       # 124212218 = userdata 末 LBA（本机实测）
 lba_bytes = 4096
 
 
