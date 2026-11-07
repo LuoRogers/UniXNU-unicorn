@@ -152,7 +152,7 @@ jobs:
 
         # prelink 之后内核 padding 已被 kext 占用，补丁会报 "Padding ... is not empty"。
 
-        python3 "$OUT/tree/scripts/patch-xnu-entry-probe.py" "$AGG" --panic-screen --no-reset
+        python3 "$OUT/tree/scripts/patch-xnu-entry-probe.py" "$AGG" --panic-screen
 
         ls -l "$AGG"
 

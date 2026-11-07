@@ -196,7 +196,7 @@
     },
     {
       "name": "ramoops_region",
-      "base": "0x85200000",
+      "base": "0xa7000000",
       "size": "0x400000"
     },
     {
