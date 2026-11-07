@@ -141,44 +141,7 @@ jobs:
       working-directory: device
       run: |
         OUT=../UniXNU/out/unicorn/${OS_PROFILE}/unicorn_ipados18
-        F="$OUT/tree/scripts/patch-xnu-entry-probe.py"
-        python3 - "$F" <<'PY'
-        import sys, pathlib
-        p = pathlib.Path(sys.argv[1])
-        s = p.read_text()
-        s = s.replace(
-            "if (instruction(va) == 0xD5181000 and\n                    instruction(va + 4) == 0xD5033FDF and\n                    instruction(va + 0x20) == 0xD2A00600 and\n                    instruction(va + 0x24) == 0xD5181040):",
-            "if (instruction(va) == 0xD5181000 and\n                    instruction(va + 4) == 0xD5033FDF):")
-        s = s.replace("AFTER_MMU_VA = MMU_ENABLE_VA + 0x20", "AFTER_MMU_VA = MMU_ENABLE_VA + 4")
-        s = s.replace("AFTER_MMU_VA: 0xD2A00600", "AFTER_MMU_VA: 0xD5033FDF")
-        discovery = """    # This kernel's entry body is code, not the zero padding the original tool
-    # assumed. Locate an executable zero run and put the probe caves there.
-    need = 0x2400
-    zeros = bytes(need)
-    found = None
-    for vmaddr, vmsize, fileoff, filesize in SEGMENTS:
-        span = min(vmsize, filesize)
-        end = fileoff + span - need
-        if end <= fileoff:
-            continue
-        idx = data.find(zeros, fileoff, end)
-        while idx != -1:
-            if ((idx - fileoff) % 16) == 0:
-                found = vmaddr + (idx - fileoff)
-                break
-            idx = data.find(zeros, idx + 16, end)
-        if found:
-            break
-    if not found:
-        raise SystemExit('no executable zero run for the entry probes')
-    CAVES = {stage: found + (stage - 1) * CAVE_SIZE for stage in (1, 2, 3, 4)}
-    PANIC_CAVE_END = found + need
-"""
-        if "    return names" in s and "executable zero run" not in s:
-            s = s.replace("    return names", discovery + "    return names", 1)
-        p.write_text(s)
-        print('entry-probe patcher adapted')
-        PY
+        python3 scripts/adapt-entry-probe.py "$OUT/tree/scripts/patch-xnu-entry-probe.py"
     - name: patch the aggregate for on-screen panics (best effort)
       continue-on-error: true
       working-directory: device
