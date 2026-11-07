@@ -85,12 +85,25 @@ def main() -> int:
     if tool_block_old in s:
         s = s.replace(tool_block_old, tool_block_new)
         changed += 1
+    old_site_append = """        sites.append((call_va, 4, {'callee': callee, 'target': call_va + 4}))"""
+    new_site_append = """        sites.append((call_va, 4, {'callee': callee, 'target': call_va + 4}))
+        sites.append((AFTER_MMU_VA, 3, {'target': AFTER_MMU_VA + 4}))"""
+    if old_site_append in s:
+        s = s.replace(old_site_append, new_site_append, 1)
+        changed += 1
+    old_delay = "source = RESET_BEFORE if (stage == 4 and args.reset_before) else SOURCES[stage].format(ticks=TIMEBASE * args.reset_delay)"
+    new_delay = ("_delay = 60 if stage == 3 else args.reset_delay\n"
+                 "            source = RESET_BEFORE if (stage == 4 and args.reset_before) else SOURCES[stage].format(ticks=TIMEBASE * _delay)")
+    if old_delay in s:
+        s = s.replace(old_delay, new_delay, 1)
+        changed += 1
+
     if "    return names" in s and "executable zero run" not in s:
         s = s.replace("    return names", DISCOVERY + "    return names", 1)
         changed += 1
     p.write_text(s)
     print(f"entry-probe patcher adapted ({changed} edit(s))")
-    if changed < 5:
+    if changed < 7:
         print("warning: fewer edits than expected; the pinned tool may have changed", file=sys.stderr)
     return 0
 
