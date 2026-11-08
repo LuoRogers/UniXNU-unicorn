@@ -44,7 +44,7 @@ DISCOVERY = '''    # This kernel's entry body is code, not the zero padding the 
     for _ in range(_mcount):
         _cmd, _sz = struct.unpack_from('<II', _raw, _moff)
         if _cmd == 0x19:
-            _nm = _raw[_moff + 8:_moff + 24].rstrip(b'\0').decode('ascii', 'replace')
+            _nm = _raw[_moff + 8:_moff + 24].rstrip(bytes([0])).decode('ascii', 'replace')
             if _nm in ('__TEXT_EXEC', '__TEXT'):
                 _vm, _vs, _fo, _fs = struct.unpack_from('<QQQQ', _raw, _moff + 24)
                 _exec.append((_vm, _vs, _fo, _fs))
