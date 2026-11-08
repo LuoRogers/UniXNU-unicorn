@@ -35,7 +35,23 @@ DISCOVERY = '''    # This kernel's entry body is code, not the zero padding the 
     need = 0x2400
     zeros = bytes(need)
     found = None
-    for _vmaddr, _vmsize, _fileoff, _filesize in SEGMENTS:
+    # Caves must live in an executable segment: a zero run in __DATA or padding
+    # outside __TEXT/__TEXT_EXEC faults the instant the branch lands there.
+    _raw = bytes(data)
+    _exec = []
+    _mcount = struct.unpack_from('<I', _raw, 16)[0]
+    _moff = 32
+    for _ in range(_mcount):
+        _cmd, _sz = struct.unpack_from('<II', _raw, _moff)
+        if _cmd == 0x19:
+            _nm = _raw[_moff + 8:_moff + 24].rstrip(b'\0').decode('ascii', 'replace')
+            if _nm in ('__TEXT_EXEC', '__TEXT'):
+                _vm, _vs, _fo, _fs = struct.unpack_from('<QQQQ', _raw, _moff + 24)
+                _exec.append((_vm, _vs, _fo, _fs))
+        _moff += _sz
+    if not _exec:
+        raise SystemExit('no executable segment in this kernel')
+    for _vmaddr, _vmsize, _fileoff, _filesize in _exec:
         _span = min(_vmsize, _filesize)
         _end = _fileoff + _span - need
         if _end <= _fileoff:
